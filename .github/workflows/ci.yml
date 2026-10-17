@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Python 语法与配置检查
+    runs-on: ubuntu-latest
+    env:
+      DATA_DIR: ${{ github.workspace }}/.ci-data
+      SPARK_DRIVER: mock
+      HEADLESS: "true"
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 语法检查
+        run: python -m compileall -q app run.py
+
+      - name: 应用工厂可加载（mock 驱动）
+        run: |
+          mkdir -p "$DATA_DIR"
+          python - <<'PY'
+          from app import create_app
+          app = create_app()
+          client = app.test_client()
+          resp = client.get("/api/system")
+          assert resp.status_code == 200, resp.status_code
+          print("app factory + /api/system OK:", resp.get_json())
+          PY
