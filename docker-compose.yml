@@ -1,0 +1,29 @@
+services:
+  douyin-spark:
+    build: .
+    image: douyin-spark:latest
+    container_name: douyin-spark
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      TZ: Asia/Shanghai
+      DATA_DIR: /data
+      PORT: "8787"
+      # playwright = 真实浏览器；mock = 演示模式（不碰抖音，用来验证界面和调度）
+      SPARK_DRIVER: playwright
+      # 有头模式 + Xvfb（抖音对无头浏览器有风控，必须 false）
+      HEADLESS: "false"
+      LOGIN_TIMEOUT: "300"
+      # Flask 会话密钥（从 .env 读取；请勿在仓库中写真实值）
+      SECRET_KEY: "${SECRET_KEY:-douyin-spark-local-key}"
+      # OTP 二次验证（TOTP 动态口令），从 .env 读取；留空表示关闭。
+      # 参见 .env.example 中的 SPARK_OTP_SECRET。
+      SPARK_OTP_SECRET: "${SPARK_OTP_SECRET:-}"
+      SPARK_OTP_SESSION_HOURS: "12"
+    volumes:
+      - ./data:/data
+    # Chromium 在容器里需要更大的共享内存，否则容易崩
+    shm_size: "1gb"
+    security_opt:
+      - seccomp:unconfined

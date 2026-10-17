@@ -1,0 +1,50 @@
+# ---- 敏感数据 / 运行时状态（严禁提交）----
+data/
+state.json
+cookies*
+*.env
+.env
+.env.*
+!.env.example
+token*
+*.db
+*.sqlite3
+profiles/
+qr_*.png
+
+# ---- 本地部署 / 运维脚本与日志（可能包含主机信息或口令）----
+deploy_run.sh
+.deploy_status
+build.log
+deploy.log
+
+# ---- 备份、临时文件 ----
+*.bak*
+*.orig
+*.rej
+*.log
+*.tmp
+*.swp
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# ---- 编辑器 / 操作系统 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>抖音火花助手 · 登录</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#0f1115;color:#e6edf3;font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .box{width:340px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:28px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .logo{font-size:26px}
+  h1{font-size:17px;margin:0}
+  .sub{color:#8b949e;font-size:12px;margin:6px 0 20px}
+  label{display:block;font-size:12px;color:#8b949e;margin-bottom:6px}
+  input{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;
+        color:#e6edf3;font-size:20px;letter-spacing:6px;text-align:center}
+  input:focus{outline:none;border-color:#1f6feb}
+  button{width:100%;margin-top:16px;padding:10px;background:#1f6feb;border:0;border-radius:6px;
+         color:#fff;font-size:15px;cursor:pointer}
+  button:hover{background:#388bfd}
+  .err{color:#ff7b72;font-size:12px;margin-top:10px;text-align:center}
+  .foot{margin-top:18px;font-size:11px;color:#6e7681;text-align:center}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="brand"><span class="logo">🔥</span><h1>抖音火花助手</h1></div>
+  <div class="sub">已启用二次验证，请输入认证器中的 6 位动态口令</div>
+  <form method="post" action="/otp_login">
+    <label>动态口令</label>
+    <input name="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+           pattern="[0-9]{6}" placeholder="000000" autofocus>
+    <button type="submit">验 证</button>
+  </form>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <div class="foot">请使用已绑定的认证器 · TOTP</div>
+</div>
+</body>
+</html>

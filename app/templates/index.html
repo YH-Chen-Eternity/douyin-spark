@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>抖音火花助手</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">🔥</span>
+    <div>
+      <h1>抖音火花助手</h1>
+      <p id="sysInfo">加载中…</p>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+
+<main id="main">
+  <section class="panel" id="panel-login">
+    <div class="panel-head">
+      <h2>账号状态</h2>
+      <span class="badge" id="statusBadge">未登录</span>
+    </div>
+    <div class="login-body">
+      <div class="qr-box">
+        <div id="qrPlaceholder" class="qr-placeholder">
+          <div class="qr-icon">📱</div>
+          <p>点击右侧「扫码登录」<br>获取二维码</p>
+        </div>
+        <img id="qrImage" class="qr-image hidden" alt="登录二维码">
+        <div id="qrSpin" class="spin hidden"></div>
+      </div>
+      <div class="login-actions">
+        <div class="account-meta">
+          <div class="row"><label>备注名</label>
+            <input type="text" id="labelInput" maxlength="16" placeholder="例如：主号">
+            <button class="btn tiny" id="saveLabel">保存</button>
+          </div>
+          <div class="row"><label>当前身份</label><span id="nicknameText">—</span></div>
+          <div class="row"><label>最近登录</label><span id="lastLoginText">—</span></div>
+          <div class="row"><label>下次执行</label><span id="nextRunText">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btnLogin">扫码登录</button>
+          <button class="btn" id="btnCancelLogin" disabled>取消</button>
+          <button class="btn" id="btnVerify" disabled>校验登录态</button>
+          <button class="btn danger" id="btnLogout" disabled>登出</button>
+        </div>
+        <div class="cookie-box">
+          <div class="cookie-title">📱 验证码登录（推荐，登录后自动抓取 Cookie）</div>
+          <div class="sms-row">
+            <input type="tel" id="smsPhone" placeholder="输入抖音绑定的手机号" maxlength="11">
+            <button class="btn primary" id="btnSmsSend">获取验证码</button>
+          </div>
+          <div class="sms-row">
+            <input type="tel" id="smsCode" placeholder="输入短信验证码" maxlength="6">
+            <button class="btn" id="btnSmsLogin">登录</button>
+          </div>
+          <p class="hint">无需扫码、无需手动复制 Cookie。填入手机号→收验证码→登录，登录态自动保存。</p>
+        </div>
+        <div class="cookie-box">
+          <div class="cookie-title">🔑 备用：手动粘贴 Cookie</div>
+          <ol class="cookie-steps">
+            <li>电脑浏览器打开 www.douyin.com 并登录账号</li>
+            <li>按 F12 →「网络 Network」→ 刷新页面</li>
+            <li>点任意 douyin.com 请求 →「标头」里复制 <b>Cookie:</b> 后面的整段内容</li>
+            <li>粘贴到下面，点「导入 Cookie」</li>
+          </ol>
+          <textarea id="cookieInput" rows="4" placeholder="粘贴整段 Cookie，例如：sessionid=xxx; sid_tt=yyy; ..."></textarea>
+          <button class="btn primary" id="btnCookieLogin">导入 Cookie</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-task">
+    <div class="panel-head">
+      <h2>定时任务</h2>
+      <label class="switch">
+        <input type="checkbox" id="taskToggle">
+        <span class="slider"></span>
+        <em id="taskToggleText">已停用</em>
+      </label>
+    </div>
+
+    <div class="field">
+      <label class="field-label">每日发送时间点</label>
+      <div class="time-chips" id="timeChips"></div>
+      <div class="time-add">
+        <input type="time" id="timeInput" value="21:00">
+        <button class="btn tiny" id="addTime">添加</button>
+        <span class="quick">
+          快捷：
+          <button class="link" data-quick="08:00">08:00</button>
+          <button class="link" data-quick="12:00">12:00</button>
+          <button class="link" data-quick="18:00">18:00</button>
+          <button class="link" data-quick="21:00">21:00</button>
+          <button class="link" data-quick="23:30">23:30</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">消息内容（多条时按下方规则选取）</label>
+      <div id="msgList" class="msg-list"></div>
+      <div class="time-add">
+        <input type="text" id="msgInput" placeholder="输入一条消息，支持 {nickname} {date} {time}">
+        <button class="btn tiny" id="addMsg">添加</button>
+      </div>
+      <div class="row small">
+        <label>选取方式</label>
+        <select id="msgMode">
+          <option value="random">随机一条</option>
+          <option value="rotate">按顺序轮换</option>
+        </select>
+        <label>间隔抖动（秒）</label>
+        <input type="number" id="jitter" min="0" max="3600" style="width:90px" value="20">
+        <label class="checkbox"><input type="checkbox" id="dryRun"> 试运行（不真发）</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="saveTask">保存设置</button>
+      <button class="btn" id="runNow">立即执行一次</button>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-friends">
+    <div class="panel-head">
+      <h2>好友列表</h2>
+      <div class="head-actions">
+        <button class="btn tiny" id="toggleAll">全选</button>
+        <button class="btn tiny" id="toggleNone">全不选</button>
+        <button class="btn tiny primary" id="refreshFriends">刷新</button>
+      </div>
+    </div>
+    <div class="friend-add">
+      <input type="text" id="friendInput" placeholder="手动添加好友：填写昵称（需与抖音会话名一致）">
+      <button class="btn tiny" id="addFriend">添加</button>
+    </div>
+    <div class="friend-toolbar">
+      <input type="text" id="friendSearch" placeholder="搜索…">
+      <span class="muted" id="friendSummary"></span>
+    </div>
+    <div class="friend-list" id="friendList"></div>
+  </section>
+
+  <section class="panel" id="panel-logs">
+    <div class="panel-head">
+      <h2>运行日志</h2>
+      <button class="btn tiny" id="clearLogs">清空</button>
+    </div>
+    <div class="log-box" id="logBox"></div>
+  </section>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
