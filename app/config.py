@@ -32,12 +32,30 @@ TZ = os.environ.get("TZ", "Asia/Shanghai")
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8787"))
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "douyin-spark-local-key")
-
 # ---- OTP（TOTP）二次验证 ----
 # 设置 SPARK_OTP_SECRET（Base32 密钥）后，访问界面/API 需先输 6 位动态口令。
 OTP_SECRET = os.environ.get("SPARK_OTP_SECRET", "").strip()
 OTP_SESSION_HOURS = int(os.environ.get("SPARK_OTP_SESSION_HOURS", "12"))
+
+# Flask 会话签名密钥。
+# 这里不能使用固定的默认值：会话 Cookie 里保存着「OTP 已通过」的标记，
+# 密钥一旦是源码里公开的常量，任何人都能伪造会话绕过 OTP（2026-10 安全审计确认过）。
+# - 启用 OTP 时必须显式设置 SECRET_KEY，否则直接拒绝启动（fail closed）；
+# - 未启用 OTP 时生成随机临时密钥，重启后旧会话失效，避免带着固定密钥裸奔。
+SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    if OTP_SECRET:
+        raise RuntimeError(
+            "启用了 SPARK_OTP_SECRET 但没有设置 SECRET_KEY，拒绝启动。"
+            "请生成随机密钥并写入环境变量，例如：openssl rand -hex 32"
+        )
+    import secrets as _secrets
+
+    SECRET_KEY = _secrets.token_hex(32)
+    print(
+        "警告：未设置 SECRET_KEY，已生成随机临时密钥（重启后现有登录会话会失效）",
+        flush=True,
+    )
 
 # 单次驱动操作的默认超时（秒）
 OP_TIMEOUT = int(os.environ.get("OP_TIMEOUT", "90"))

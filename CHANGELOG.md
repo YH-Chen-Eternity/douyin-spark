@@ -5,6 +5,21 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-18
+
+安全修复版本。
+
+### Security
+
+- 修复 OTP 二次验证可被绕过的问题：会话 Cookie 使用固定的默认 `SECRET_KEY`，任何人都能伪造「OTP 已通过」的会话。现在启用 OTP 时必须显式设置 `SECRET_KEY`，否则拒绝启动；未启用 OTP 时生成随机临时密钥。
+- `docker-compose.yml` 改为强制从 `.env` 读取 `SECRET_KEY`（缺失时明确报错），`.env.example` 给出生成方式。
+- 增加基础安全响应头：`X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`。
+- 升级 Flask 到 3.1.3，修复 CVE-2026-27205（部分会话访问路径缺少 `Vary: Cookie`，在有缓存代理时可能泄露用户相关响应）。
+
+### Changed
+
+- 部署提示中补充端口暴露风险说明，建议只绑定内网地址并避免公网暴露。
+
 ## [0.1.0] - 2026-10-17
 
 首个开源版本。将内部使用的抖音续火花工具整理为规范的开源项目。
@@ -38,5 +53,6 @@
 - 移除源码与配置中的真实密钥、密码等敏感信息，统一改为环境变量与占位符。
 - 增加 `.gitignore`，排除 `data/`、`.env`、运行时日志、浏览器 Profile 等敏感文件。
 
-[Unreleased]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/YH-Chen-Eternity/douyin-spark/releases/tag/v0.1.0

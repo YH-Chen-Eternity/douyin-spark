@@ -78,7 +78,10 @@
 git clone https://github.com/YH-Chen-Eternity/douyin-spark.git
 cd douyin-spark
 
-cp .env.example .env   # 至少改一下 SECRET_KEY，不要提交 .env
+cp .env.example .env
+
+# 必须生成 SECRET_KEY 填进 .env，否则 compose 会拒绝启动（会话密钥不能是公开固定值）
+python -c "import secrets;print(secrets.token_hex(32))"
 
 docker compose build
 docker compose up -d
@@ -88,6 +91,8 @@ docker compose logs -f --tail 100
 启动后访问 `http://<部署机IP>:8787`。
 
 容器里的 `entrypoint.sh` 会启动 Xvfb 虚拟显示，浏览器以有头模式运行。抖音对无头浏览器风控很严，`HEADLESS` 请保持 `false`。
+
+默认 `docker compose` 会把端口发布到所有网卡。如果只在本机用，建议把 `ports` 改成 `"127.0.0.1:8787:8787"`，或绑定到具体内网地址。
 
 ### 本地运行
 
@@ -215,9 +220,11 @@ sudo usermod -aG docker "$USER"
 
 `data/` 里有数据库、浏览器 Profile、Cookie 和二维码截图，属于登录态数据，不要提交、不要分享。`.env` 里有 `SECRET_KEY` 和 `SPARK_OTP_SECRET`，同样不要提交。部署脚本里的密码、私钥、内网地址也别写进仓库，`deploy.example.sh` 是个占位符版本。
 
+`SECRET_KEY` 必须设置为随机值，不能用默认/固定值：会话 Cookie 里带有「OTP 已通过」的标记，密钥泄露就等于 OTP 可以被伪造绕过。启用 OTP 时如果没有设置 `SECRET_KEY`，程序会直接拒绝启动。
+
 贴日志或截图到 Issue 之前，先把 Cookie、`sessionid`、手机号、内网 IP 之类的删掉。
 
-建议只在内网跑。非要公网访问的话，前面加一层 HTTPS 反向代理，再配合 OTP 和访问控制。怀疑密钥泄露就重新扫码登录，换掉 `SPARK_OTP_SECRET` 和 `SECRET_KEY`。
+建议只在内网跑，端口只绑定内网地址。非要公网访问的话，前面加一层 HTTPS 反向代理，再配合 OTP 和访问控制。怀疑密钥泄露就重新扫码登录，换掉 `SPARK_OTP_SECRET` 和 `SECRET_KEY`。
 
 更多见 [SECURITY.md](SECURITY.md)。
 

@@ -5,6 +5,9 @@ services:
     container_name: douyin-spark
     restart: unless-stopped
     ports:
+      # 默认监听所有网卡，方便局域网访问。
+      # 安全提示：不需要对外提供时，建议改成 "127.0.0.1:8787:8787"
+      # 或只绑定内网地址（如 "192.168.1.10:8787:8787"），并避免暴露到公网。
       - "8787:8787"
     environment:
       TZ: Asia/Shanghai
@@ -15,15 +18,18 @@ services:
       # 有头模式 + Xvfb（抖音对无头浏览器有风控，必须 false）
       HEADLESS: "false"
       LOGIN_TIMEOUT: "300"
-      # Flask 会话密钥（从 .env 读取；请勿在仓库中写真实值）
-      SECRET_KEY: "${SECRET_KEY:-douyin-spark-local-key}"
+      # Flask 会话密钥，必须从 .env 读取（固定默认值会让 OTP 可被伪造绕过，已修复）
+      SECRET_KEY: "${SECRET_KEY:?请先在 .env 中设置 SECRET_KEY（openssl rand -hex 32）}"
       # OTP 二次验证（TOTP 动态口令），从 .env 读取；留空表示关闭。
       # 参见 .env.example 中的 SPARK_OTP_SECRET。
       SPARK_OTP_SECRET: "${SPARK_OTP_SECRET:-}"
       SPARK_OTP_SESSION_HOURS: "12"
     volumes:
       - ./data:/data
+    # 让容器新写出的数据库/Profile/Cookie 默认仅 root 可读
+    command: ["/bin/sh", "-c", "umask 077 && exec python run.py"]
     # Chromium 在容器里需要更大的共享内存，否则容易崩
     shm_size: "1gb"
     security_opt:
       - seccomp:unconfined
+      - no-new-privileges:true

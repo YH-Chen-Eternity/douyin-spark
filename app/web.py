@@ -546,6 +546,15 @@ def clear_logs(account_id):
 
 def init_app(app):
     app.register_blueprint(bp)
+
+    @app.after_request
+    def _security_headers(response):
+        """补几个基础安全响应头（不引入 CSP，避免影响现有页面内联样式）。"""
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        return response
+
     init_scheduler(app)
     start_scheduler()
     with app.app_context():
