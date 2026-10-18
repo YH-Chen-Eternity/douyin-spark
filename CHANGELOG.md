@@ -5,6 +5,23 @@
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-18
+
+进一步加固运行环境。
+
+### Security
+
+- 容器改为以非 root 用户（uid 10001）运行，`Dockerfile` 不再默认使用 root。
+- 容器增加 `cap_drop: ALL` 与 `no-new-privileges`，去掉不必要的 `seccomp:unconfined`。
+- OTP 登录增加失败限速：同一 IP 连续失败 5 次后锁定 5 分钟，返回 429。
+- `.dockerignore` 补充排除备份文件、部署脚本与本地 `.env`，避免被打进镜像。
+
+### Changed
+
+- Playwright 浏览器改安装到 `/ms-playwright`（`PLAYWRIGHT_BROWSERS_PATH`），非 root 用户可正常启动 Chromium。
+- `entrypoint.sh` 兼容非 root 启动 Xvfb。
+- README 补充数据目录归属（`chown 10001:10001 data`）说明。
+
 ## [0.1.1] - 2026-10-18
 
 安全修复版本。
@@ -53,6 +70,7 @@
 - 移除源码与配置中的真实密钥、密码等敏感信息，统一改为环境变量与占位符。
 - 增加 `.gitignore`，排除 `data/`、`.env`、运行时日志、浏览器 Profile 等敏感文件。
 
-[Unreleased]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/YH-Chen-Eternity/douyin-spark/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/YH-Chen-Eternity/douyin-spark/releases/tag/v0.1.0

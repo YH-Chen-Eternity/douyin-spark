@@ -26,10 +26,12 @@ services:
       SPARK_OTP_SESSION_HOURS: "12"
     volumes:
       - ./data:/data
-    # 让容器新写出的数据库/Profile/Cookie 默认仅 root 可读
+    # 容器以非 root 用户（uid 10001）运行，新写出的数据默认仅该用户可读
     command: ["/bin/sh", "-c", "umask 077 && exec python run.py"]
     # Chromium 在容器里需要更大的共享内存，否则容易崩
     shm_size: "1gb"
+    # 非 root 运行下已验证可以去掉 seccomp:unconfined；同时清空默认 capabilities
     security_opt:
-      - seccomp:unconfined
       - no-new-privileges:true
+    cap_drop:
+      - ALL

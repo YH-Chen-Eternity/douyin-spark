@@ -7,6 +7,8 @@ if [ -z "$DISPLAY" ]; then
   # 清理上次运行残留的锁/socket，避免容器重启后 Xvfb 启动失败
   rm -f /tmp/.X99-lock
   rm -f /tmp/.X11-unix/X99
+  # 容器以非 root 运行，/tmp 可写，确保 socket 目录存在
+  mkdir -p /tmp/.X11-unix
   Xvfb :99 -screen 0 1440x900x24 -nolisten tcp >/dev/null 2>&1 &
   export DISPLAY=:99
   # 等待 Xvfb 的 socket 就绪（最多 10 秒）

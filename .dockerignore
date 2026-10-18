@@ -7,3 +7,10 @@ __pycache__/
 venv/
 *.db
 *.log
+*.bak
+*.bak.*
+docker-compose.yml.bak*
+.deploy_status
+deploy_run.sh
+.env
+.env.*

@@ -83,6 +83,10 @@ cp .env.example .env
 # 必须生成 SECRET_KEY 填进 .env，否则 compose 会拒绝启动（会话密钥不能是公开固定值）
 python -c "import secrets;print(secrets.token_hex(32))"
 
+# 容器以非 root 用户（uid 10001）运行，数据目录要先交给它
+sudo mkdir -p data
+sudo chown -R 10001:10001 data
+
 docker compose build
 docker compose up -d
 docker compose logs -f --tail 100

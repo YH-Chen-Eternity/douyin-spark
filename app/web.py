@@ -31,6 +31,49 @@ from app.services.scheduler import (
 bp = Blueprint("web", __name__)
 
 # ---------------------------------------------------------------- OTP 认证
+# OTP 失败次数限制：同一 IP 连续失败 5 次后锁定 5 分钟，防止 6 位口令被暴力尝试。
+OTP_MAX_FAILURES = 5
+OTP_LOCK_SECONDS = 300
+
+_otp_attempts = {}  # ip -> (失败次数, 首次失败时间, 锁定截止时间)
+_otp_attempts_lock = threading.Lock()
+
+
+def _otp_client_ip():
+    return request.remote_addr or "unknown"
+
+
+def _otp_is_locked(ip):
+    now = time.time()
+    with _otp_attempts_lock:
+        record = _otp_attempts.get(ip)
+        if not record:
+            return False
+        _count, first_ts, locked_until = record
+        if locked_until and now < locked_until:
+            return True
+        if now - first_ts > OTP_LOCK_SECONDS:
+            _otp_attempts.pop(ip, None)
+        return False
+
+
+def _otp_record_failure(ip):
+    now = time.time()
+    with _otp_attempts_lock:
+        count, first_ts, locked_until = _otp_attempts.get(ip, (0, now, 0))
+        if now - first_ts > OTP_LOCK_SECONDS:
+            count, first_ts, locked_until = 0, now, 0
+        count += 1
+        if count >= OTP_MAX_FAILURES:
+            locked_until = now + OTP_LOCK_SECONDS
+        _otp_attempts[ip] = (count, first_ts, locked_until)
+
+
+def _otp_reset_failures(ip):
+    with _otp_attempts_lock:
+        _otp_attempts.pop(ip, None)
+
+
 @bp.before_request
 def require_otp():
     """启用 OTP 后，所有请求（除登录页/静态资源）都要先通过二次验证。"""
@@ -57,11 +100,22 @@ def otp_login():
         return redirect(url_for("web.index"))
     error = ""
     if request.method == "POST":
+        ip = _otp_client_ip()
+        if _otp_is_locked(ip):
+            return (
+                render_template(
+                    "otp_login.html",
+                    error=f"尝试次数过多，请 {OTP_LOCK_SECONDS // 60} 分钟后再试",
+                ),
+                429,
+            )
         code = request.form.get("otp", "").strip()
         if verify_totp(OTP_SECRET, code):
+            _otp_reset_failures(ip)
             session["otp_ok"] = True
             session["otp_time"] = int(time.time())
             return redirect(url_for("web.index"))
+        _otp_record_failure(ip)
         error = "口令错误或已过期，请重试"
     return render_template("otp_login.html", error=error)
 
