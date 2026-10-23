@@ -240,6 +240,25 @@ sudo usermod -aG docker "$USER"
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)：行为准则
 - [SECURITY.md](SECURITY.md)：安全问题怎么报
 
+## 支持作者（赞赏）
+
+这个项目是我用课余时间做的学习交流工具：Playwright 适配、界面改版、定时与日志、安全加固（非 root 运行、OTP 限速）都是一点点抠出来的。抖音一改版就得重新适配，维护成本其实不低。
+
+如果这个工具帮到了你，**欢迎扫码赞赏** —— 这是对我继续维护它最直接的鼓励 ☕
+
+<div align="center">
+
+<img width="220" alt="赞赏码" src="docs/donation-qrcode.png" />
+
+</div>
+
+> 说明：
+>
+> - 赞赏**完全自愿**。不赞赏也可以自由使用本项目的全部功能，与本项目的 Apache-2.0 授权无关。
+> - 赞赏**不代表**购买服务：不提供优先支持、定制开发、代跑、代维护或任何商业承诺。
+> - 本项目仅用于学习交流，请勿用于商业用途（详见下方《免责声明》）。
+> - 遇到问题请提 Issue，我会按自己的时间处理，不保证响应时间。
+
 ## 许可证
 
 本项目采用 [Apache License 2.0](LICENSE)，版权信息见 [NOTICE](NOTICE)。
